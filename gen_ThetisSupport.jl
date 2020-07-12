@@ -1,6 +1,7 @@
+using Pkg
+Pkg.activate(".")
 using PackageCompiler
 using Libdl
-using Pkg
 dir = @__DIR__
 pwd = @__DIR__
 
@@ -13,4 +14,3 @@ create_sysimage(:JSON; sysimage_path=sysimage_path,
     precompile_execution_file=joinpath(@__DIR__, "gen_ThetisSupport_execution.jl"),
     precompile_statements_file=joinpath(@__DIR__, "gen_ThetisSupport_precompile.jl"),
     script=script)
-
