@@ -34,7 +34,7 @@ popd
 
 cp -fv scripts/env-release.sh build_release
 cp -fv scripts/env-release-julia.sh build_release_julia
-zip -r thetis.zip build_release/libThetis.so build_release/TestThetis build_release_julia/libThetis.so build_release_julia/TestThetis testData/* licenses LICENSE $JULIA_HOME_SHORT
+zip -r thetis.zip build_release/libThetis.so build_release/*.sh build_release/TestThetis build_release_julia/libThetis.so build_release_julia/TestThetis build_release_julia/*.sh testData/* licenses LICENSE $JULIA_HOME_SHORT
 echo pwd is $PWD
 ls -lh *.zip
 #echo ls -lh /home/runner/work/Thetis/Thetis/thetis.zip
