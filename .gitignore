@@ -31,4 +31,11 @@
 *.out
 *.app
 build/
-build_release/
+build_release/build_release_julia
+thetis.zip
+julia-1.4.2
+julia-1.4.2-linux-x86_64.tar.gz
+Manifest.toml
+Project.toml
+build_release
+build_release_julia

@@ -95,6 +95,12 @@ TEST_THETIS(TestJulia01) {
     }
 
     {
+        // call c function
+
+        jl_eval_string("println(\"bar -> \", ThetisSupport.bar(convert(Cint,21)) )");
+    }
+
+    {
         // check for exceptions
 
         jl_eval_string("this_function_does_not_exist()");

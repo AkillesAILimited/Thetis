@@ -65,9 +65,12 @@ if (UNIX)
         target_include_directories(TestThetis PUBLIC
             "$<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>"
         )
-        target_include_directories(TestThetisGPU PUBLIC
-        "$<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>"
-        )
+        if(USE_CUDA)
+            target_include_directories(TestThetisGPU PUBLIC
+            "$<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>"
+            )
+        endif(USE_CUDA)
+
         add_definitions(-DJULIA_ENABLE_THREADING -DENABLE_JULIA)
     else(USE_JULIA)
 
@@ -83,9 +86,12 @@ if (UNIX)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         message("CMAKE_BUILD_TYPE = '' => -g -O0 -D_DEBUG=1")
+        
+        if(USE_CUDA)
+            target_compile_options(TestThetisGPU PUBLIC "-g" "-O0" "-D_DEBUG=1" )
+            target_compile_options(ThetisGPU PUBLIC "-g" "-O0" "-D_DEBUG=1" )
+        endif(USE_CUDA)
 
-        target_compile_options(TestThetisGPU PUBLIC "-g" "-O0" "-D_DEBUG=1" )
-        target_compile_options(ThetisGPU PUBLIC "-g" "-O0" "-D_DEBUG=1" )
         target_compile_options(TestThetis PUBLIC "-g" "-rdynamic" "-O0" "-D_DEBUG=1" "-fsanitize=address" "-fsanitize=leak" "-DTHETIS_CPU_ONLY=1")
         target_compile_options(Thetis PUBLIC "-g" "-rdynamic" "-O0" "-D_DEBUG=1" "-fsanitize=address" "-fsanitize=leak" "-DTHETIS_CPU_ONLY=1")
 
