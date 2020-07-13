@@ -2,7 +2,9 @@
 #include "ThetisTest.h"
 
 #define CPP_SUPPORT 1
+#if defined(THETIS_USE_ISO_ALLOC)
 #include "external/isoalloc/include/iso_alloc.h"
+#endif
 #include "external/ThreadPool/ThreadPool.h"
 
 namespace thetis {
@@ -99,6 +101,7 @@ void operator delete(void* x) throw() {
     if (r > 0) std::cerr << "[[FATAL]]" << r << " leaks " << std::endl << std::flush;
 }
 #else
+#if defined(THETIS_USE_ISO_ALLOC)
 void* operator new (std::size_t size) throw (/*std::bad_alloc*/) {
     return iso_alloc(size);
 }
@@ -109,6 +112,7 @@ void operator delete(void* x) throw() {
     int32_t r = iso_alloc_detect_leaks();
     if (r > 0) std::cerr << "[[FATAL]]" << r << " leaks " << std::endl << std::flush;
 }
+#endif
 #endif
 #endif
 

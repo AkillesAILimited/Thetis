@@ -39,3 +39,4 @@ Manifest.toml
 Project.toml
 build_release
 build_release_julia
+build_release_windows
