@@ -12,4 +12,4 @@ copy Release\*.dll .
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
 zip -r thetis-windows.zip build_release_windows/*.dll build_release_windows/*.exe testData/* licenses LICENSE
-  
+echo "CD = " %CD%
