@@ -56,7 +56,7 @@ copy Release\*.dll .
 .\TestThetis.exe
 if %errorlevel% neq 0 exit /b %errorlevel%
 cd ..
-jar cvf thetis-windows.zip build_release_windows/*.dll build_release_windows/*.exe testData/* licenses LICENSE  build_release_julia_windows/*.dll build_release_julia_windows/*.exe etc include lib libexec org share
+jar cvf thetis-windows.zip build_release_windows/*.dll build_release_windows/*.exe testData/* licenses LICENSE build_release_julia_windows/*.dll build_release_julia_windows/*.exe etc include lib libexec org share
 echo "CD = " %CD%
 
 :END
