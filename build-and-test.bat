@@ -35,9 +35,9 @@ copy julia-tree-windows\Julia-1.4.2\bin\*.* .
 xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\etc ..\etc
 xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\include ..\include
 xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\lib ..\lib
-xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\libexec ..\lib
-xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\org ..\lib
-xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\share ..\lib
+xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\libexec ..\libexec
+xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\org ..\org
+xcopy /I/Y/E/H julia-tree-windows\Julia-1.4.2\share ..\share
 xcopy /I/Y/E/H julia-tree-windows\VCRT ..\VCRT
 
 cd ..
