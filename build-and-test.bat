@@ -4,7 +4,8 @@ cd build_release_julia_windows
 del /F/Q/S *.*
 del /F/Q/S julia-tree-windows
 rmdir /Q/S julia-tree-windows
-git clone git@github.com:AkillesAILimited/julia-tree-windows.git
+git clone https://github.com/AkillesAILimited/julia-tree-windows.git
+REM git@github.com:AkillesAILimited/julia-tree-windows.git
 cd julia-tree-windows 
 call make-tree.bat
 SET PATH=%CD%\Julia-1.4.2\bin;%PATH%
