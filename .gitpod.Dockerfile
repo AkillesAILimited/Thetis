@@ -2,6 +2,10 @@ FROM gitpod/workspace-full-vnc
 
 USER gitpod
 
+RUN sudo apt-get -q update && \
+    sudo apt-get install -yq atom && \
+    sudo rm -rf /var/lib/apt/lists/*
+
 # Install custom tools, runtime, etc. using apt-get
 # For example, the command below would install "bastet" - a command line tetris clone:
 #
