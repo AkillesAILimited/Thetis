@@ -1,2 +1,4 @@
 wget https://atom.io/download/deb
 dpkg-deb -R deb atom
+## 
+atom --no-sandbox
