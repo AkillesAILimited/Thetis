@@ -4,8 +4,10 @@ USER gitpod
 
 RUN wget https://atom.io/download/deb
 RUN mv deb atom.deb
-RUN sudo apt install -f ./atom.deb
-RUN rm atom.deb
+RUN sudo apt-get -q update && \
+  sudo apt install -f ./atom.deb & \ 
+  sudo rm -rf /var/lib/apt/lists/* && \
+  rm atom.deb
 
 #RUN sudo apt-get -q update && \
 #    sudo apt-get install -yq atom && \
