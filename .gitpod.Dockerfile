@@ -3,7 +3,7 @@ FROM gitpod/workspace-full-vnc
 USER gitpod
 
 RUN wget https://atom.io/download/deb
-RUN sudo dpkg -i deb
+RUN sudo apt install deb
 RUN rm deb
 
 #RUN sudo apt-get -q update && \
