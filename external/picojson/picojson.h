@@ -92,12 +92,22 @@ extern "C" {
 }
 #endif
 
+#ifndef _LIBCPP_HAS_NO_THREADS
 #ifndef PICOJSON_ASSERT
 #define PICOJSON_ASSERT(e)                                                                                                         \
   do {                                                                                                                             \
     if (!(e))                                                                                                                      \
       throw std::runtime_error(#e);                                                                                                \
   } while (0)
+#endif
+#else
+#ifndef PICOJSON_ASSERT
+#define PICOJSON_ASSERT(e)                                                                                                         \
+  do {                                                                                                                             \
+    if (!(e))                                                                                                                      \
+      std::cerr << (#e) << std::endl << std::flush; exit(1);                                                                                                \
+  } while (0)
+#endif
 #endif
 
 #ifdef _MSC_VER
@@ -247,7 +257,12 @@ inline value::value(double n) : type_(number_type), u_() {
       isnan(n) || isinf(n)
 #endif
           ) {
+#ifndef  _LIBCPP_HAS_NO_THREADS 
     throw std::overflow_error("");
+#else
+    std::cerr << "overflow" << std::endl;
+    exit(1);
+#endif
   }
   u_.number_ = n;
 }

@@ -3,3 +3,10 @@ dpkg-deb -R deb atom
 ## 
 atom/juno: atom --no-sandbox
 vscode: /usr/share/code/bin/code . 
+
+####
+/opt/wasi-sdk/bin/clang++ Matrix.cpp TestMatrix.cpp TestThetis.cpp TestUtils.cpp doctest/parts/doctest.cpp -o TestThetis.wasm --verbose -fno-exceptions
+
+####
+/opt/wasi-sdk/bin/clang++ Matrix.cpp TestMatrix.cpp TestThetis.cpp TestUtils.cpp doctest/parts/doctest.cpp -o TestThetis.wasm --verbose -fno-exceptions -DBOOM -D_DEBUG
+~/Downloads/wasmtime-v0.19.0-x86_64-linux/wasmtime TestThetis.wasm 

@@ -2,6 +2,8 @@
 #include "Thetis.h"
 #include "doctest/doctest.h"
 #define TEST_THETIS(X) TEST_CASE(#X)
+
+#ifndef _LIBCPP_HAS_NO_THREADS
 #define TEST_THETIS_PARALLEL(X) \
     void _TEST_CASE_PARALLEL_ ##X (); \
     TEST_CASE(#X) { \
@@ -16,6 +18,17 @@
         }); \
     } \
     void _TEST_CASE_PARALLEL_ ##X ()
+#else
+#define TEST_THETIS_PARALLEL(X) \
+    void _TEST_CASE_PARALLEL_ ##X (); \
+    TEST_CASE(#X) { \
+        thetis::start_test(#X, [&]() -> bool { \
+                _TEST_CASE_PARALLEL_ ##X (); \
+            return true; \
+        }); \
+    } \
+    void _TEST_CASE_PARALLEL_ ##X ()
+#endif
 
 namespace thetis {
     void start_test(const std::string &name, std::function<bool()> f);

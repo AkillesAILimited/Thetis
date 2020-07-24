@@ -65,7 +65,9 @@
         "random": "cpp",
         "set": "cpp",
         "string": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "strstream": "cpp",
+        "hash_map": "cpp"
     },
     "git.ignoreLimitWarning": true,
     "C_Cpp.default.configurationProvider": "go2sh.cmake-integration"

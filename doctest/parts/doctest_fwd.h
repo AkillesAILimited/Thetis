@@ -249,6 +249,10 @@ DOCTEST_MSVC_SUPPRESS_WARNING(26812) // Prefer 'enum class' over 'enum'
 #undef DOCTEST_CONFIG_POSIX_SIGNALS
 #endif // DOCTEST_CONFIG_NO_POSIX_SIGNALS
 
+#ifdef _LIBCPP_HAS_NO_THREADS
+#undef DOCTEST_CONFIG_POSIX_SIGNALS
+#endif
+
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
 #if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
 #define DOCTEST_CONFIG_NO_EXCEPTIONS

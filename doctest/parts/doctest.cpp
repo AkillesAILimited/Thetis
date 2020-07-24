@@ -1,5 +1,5 @@
 #if defined(DOCTEST_CONFIG_IMPLEMENT) || !defined(DOCTEST_SINGLE_HEADER)
-
+#include <iostream>
 #ifndef DOCTEST_SINGLE_HEADER
 #include "doctest_fwd.h"
 #endif // DOCTEST_SINGLE_HEADER
@@ -106,8 +106,20 @@ DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
 #include <algorithm>
 #include <iomanip>
 #include <vector>
+
+#ifndef _LIBCPP_HAS_NO_THREADS
 #include <atomic>
 #include <mutex>
+#else
+namespace std {
+    template<typename T>
+    using atomic = T;
+    struct mutex {};
+    template<typename T>
+    using lock_guard = T;
+}
+#endif
+
 #include <set>
 #include <map>
 #include <exception>

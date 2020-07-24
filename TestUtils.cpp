@@ -1,11 +1,14 @@
 #include "ThetisTest.h"
 
+#ifndef _LIBCPP_HAS_NO_THREADS
 using namespace rapidxml;
 
 // Not a real test but a ~ quick demo
 TEST_THETIS(TestXml01) {
     auto folder = thetis::executable_path();
+#ifndef _LIBCPP_HAS_NO_THREADS 	
     spdlog::debug("executable path = {}", folder);
+#endif
     auto path = folder 
         + std::string(1, thetis::kPathSeparator) 
         + ".."
@@ -13,7 +16,9 @@ TEST_THETIS(TestXml01) {
         + "testData"
         + std::string(1, thetis::kPathSeparator) 
         + "beerJournal.xml";
+#ifndef _LIBCPP_HAS_NO_THREADS
     spdlog::debug("xml path = {}", path);
+#endif
     std::ifstream theFile(path);
 
 	xml_document<> doc;
@@ -42,4 +47,16 @@ TEST_THETIS(TestXml01) {
 	    std::cout << std::endl;
 	}        
 }
+
+#endif
+
+#if BOOM10
+// crashes!
+TEST_THETIS(TestJson) {
+	std::cout << "test json " << std::endl;
+	auto v = thetis::parse_json("{\"x\":\"y\",\"a\":[1,2,3,4,                       6.1200000000000000000000000000]}");
+	auto s2 = thetis::to_string(v);
+	std::cout << "parse/dumped string = " << s2 << std::endl;
+}
+#endif
 

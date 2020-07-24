@@ -5,7 +5,11 @@
 #include <tuple>
 #include <cassert>
 #include <functional>
+
+#ifndef _LIBCPP_HAS_NO_THREADS
 #include <thread>
+#endif
+
 #include <fstream>
 #include <sstream>
 
@@ -47,7 +51,9 @@ time_t timegm(struct tm * a_tm)
 */
 
 #else
-#include <mach-o/dyld.h>
+#ifdef __APPLE__
+  #include <mach-o/dyld.h>
+#endif
 #endif
 #endif
 
@@ -60,13 +66,16 @@ time_t timegm(struct tm * a_tm)
 #endif
 #endif
 
-// failure with CUDA compilter
-#ifndef __CUDACC__
+// failure with CUDA compilter & WASI
+#if !defined(__CUDACC__) && !defined( _LIBCPP_HAS_NO_THREADS)
 #include "external/spdlog/include/spdlog/spdlog.h"
 #endif
 
 #include "external/picojson/picojson.h"
+
+#ifndef  _LIBCPP_HAS_NO_THREADS        
 #include "external/rapidxml/rapidxml.hpp"
+#endif
 
 namespace thetis {
 
@@ -102,6 +111,7 @@ namespace thetis {
 		GetModuleFileNameA(hModule, path, MAX_PATH);
 		return directory_part(path);
 #else
+#ifdef __MACOS__
 char path[1024];
 uint32_t size = sizeof(path);
 if (_NSGetExecutablePath(path, &size) == 0)
@@ -110,10 +120,57 @@ else
     printf("buffer too small; need size %u\n", size);
 //exit(1);
 return directory_part(path);
+#else
+return "";
+#endif
 #endif
 #endif        
         
     }
+
+
+    inline std::string to_string(const picojson::value &v) {
+        std::stringstream ss;
+        ss << v;
+        return ss.str();
+    }
+
+    inline picojson::value parse_json(const std::string &s) {
+        std::stringstream ss(s);
+        picojson::value v;
+        ss >> v;
+        return v;
+    }
+
+	inline double approx(double x, int n) {
+		double huho = std::pow(10.0, double(n));
+		return std::round((x) * huho) / huho;
+        // return std::round((x / std::round(std::abs(x) + 1)) * huho) / huho;
+	}
+
+	inline picojson::value normalize(const picojson::value& v) {
+		if (v.is<double>()) {
+			return picojson::value(approx(v.get<double>(), 4));
+		}
+		if (v.is<picojson::array>()) {
+			auto& a = v.get<picojson::array>();
+			picojson::array rv;
+			for (auto &k: a) {
+				rv.push_back(normalize(k));
+			}
+			return picojson::value(rv);
+		}
+		if (v.is<picojson::object>()) {
+			auto& o = v.get<picojson::object>();
+			picojson::object rv;
+			for (auto& kp : o) {
+				rv[kp.first] = normalize(kp.second);
+			}
+			return picojson::value(rv);
+		}
+		return v;
+	}
+
 
     inline std::string readAllText(const std::string &s) {
         std::ifstream t(s);
@@ -165,7 +222,7 @@ return directory_part(path);
     template<typename T>
     using Singleton = _Singleton<T, int>;
 
-#ifndef __CUDACC__    
+#if !defined(__CUDACC__) && !defined(_LIBCPP_HAS_NO_THREADS)
     template<typename ...A>
     inline void error(const char* file, int line, spdlog::string_view_t v, A... a) {
         // N.B. as this is an error, no need to over optimize...
@@ -178,7 +235,11 @@ return directory_part(path);
     inline void error(const char* file, int line, const char* v, A... a) {
         // N.B. as this is an error, no need to over optimize...
         std::cerr << "[CUDA] " << file << ":" << line << ": " << v << std::endl << std::flush;
+#ifndef _LIBCPP_HAS_NO_THREADS                
         throw std::logic_error(file + std::string(":")+ std::to_string(line)); 
+#else
+        exit(1);
+#endif
     }
 #endif
 
@@ -193,6 +254,8 @@ return directory_part(path);
 
 namespace thetis {
 #ifdef _DEBUG 
+//#error "really Georges?"
+// doesn't seem to work with WASI-sdk
     template<typename T>
     inline T _check_canary(const T &x, const char * file, int line) {
         const unsigned char *b = reinterpret_cast<const unsigned char *>(&x);

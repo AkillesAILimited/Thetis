@@ -1,11 +1,18 @@
+#include <iostream>
+#ifndef _LIBCPP_HAS_NO_THREADS
 #include <omp.h>
+#endif
+
 #include "ThetisTest.h"
 
 #define CPP_SUPPORT 1
 #if defined(THETIS_USE_ISO_ALLOC)
 #include "external/isoalloc/include/iso_alloc.h"
 #endif
+
+#ifndef _LIBCPP_HAS_NO_THREADS
 #include "external/ThreadPool/ThreadPool.h"
+#endif
 
 namespace thetis {
     /** When using the malloc wrapper, convert wrapped chunk size to actual size */
@@ -121,17 +128,26 @@ void operator delete(void* x) throw() {
 #ifdef DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 DOCTEST_MSVC_SUPPRESS_WARNING_WITH_PUSH(4007) // 'function' : must be 'attribute' - see issue #182
 int main(int argc, char** argv) { 
+
+#ifndef _LIBCPP_HAS_NO_THREADS    
     omp_set_dynamic(1);
     omp_set_nested(1); 
     spdlog::set_level(spdlog::level::debug);
     spdlog::debug(" num threads = {}, max threads = {}", omp_get_num_threads(), omp_get_max_threads());
+#endif
 
     auto rv = doctest::Context(argc, argv).run(); 
 
+
+#ifndef _LIBCPP_HAS_NO_THREADS
     spdlog::debug("waiting for parallel tests");
+#endif    
     ThetisAssert(thetis::check_tests());
+
+#ifndef _LIBCPP_HAS_NO_THREADS    
     spdlog::debug("parallel tests 'probably' passed");
     spdlog::shutdown();
+#endif
     return rv;
 }
 DOCTEST_MSVC_SUPPRESS_WARNING_POP
@@ -146,29 +162,58 @@ TEST_CASE("main") { std::cout << "hello from <main>" << std::endl << std::flush;
 //}
 
 namespace {
+#ifndef _LIBCPP_HAS_NO_THREADS
     thread_pool::ThreadPool pool(omp_get_max_threads());
     std::vector< std::future<bool> > results;
+#else
+    std::vector<bool> results;
+#endif
     std::vector< std::string > names;  
 }
 
 namespace thetis {
     void start_test(const std::string &name, std::function<bool()> f) {
+
+#ifndef _LIBCPP_HAS_NO_THREADS        
         results.emplace_back(pool.enqueue(f));
+#else   
+        results.emplace_back(f());
+#endif
         names.emplace_back(name);
     }
 
     bool check_tests() {
         bool status = true;
         for (unsigned i=0; i<results.size(); ++i) {
+
+
+#ifdef _LIBCPP_HAS_NO_THREADS            
+            if (!results[i]) {
+                status = false;
+                std::cerr << "// test failed in 1thr mode: " << names[i] << std::endl;
+            } else {
+                std::cerr <<"// test success in 1thr mode: " << names[i] << std::endl; 
+            }
+#else
             if (!results[i].get()) {
                 status = false;
                 spdlog::error("// test failed: {}", names[i]);
             } else {
                 spdlog::debug("// test success: {}", names[i]);
             }
+#endif
         }
 
         ThetisAssert(status);
         return status;
     }
 }
+
+#ifdef _LIBCPP_HAS_NO_THREADS 
+extern "C" {
+int32_t __cxa_thread_atexit(int32_t, int32_t, int32_t) {
+    printf("EXIT\n");
+    return 1;
+}
+}
+#endif
