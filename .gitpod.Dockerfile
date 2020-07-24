@@ -7,6 +7,7 @@ RUN mv deb atom.deb
 RUN sudo apt-get -q update && \
   sudo bash -c "export DEBIAN_FRONTEND=noninteractive; apt-get install -f -y keyboard-configuration; echo \$DEBIAN_FRONTEND" && \
   sudo apt install -f -y ./atom.deb && \ 
+  sudo apt-get install -f -y julia && \
   sudo rm -rf /var/lib/apt/lists/* && \
   rm atom.deb
 
