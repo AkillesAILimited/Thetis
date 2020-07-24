@@ -5,7 +5,8 @@ USER gitpod
 RUN wget https://atom.io/download/deb
 RUN mv deb atom.deb
 RUN sudo apt-get -q update && \
-  DEBIAN_FRONTEND=noninteractive sudo apt install -f -y ./atom.deb && \ 
+  sudo bash -c "export DEBIAN_FRONTEND=noninteractive; apt-get install keyboard-configuration; echo \$DEBIAN_FRONTEND" && \
+  sudo apt install -f -y ./atom.deb && \ 
   sudo rm -rf /var/lib/apt/lists/* && \
   rm atom.deb
 
