@@ -10,6 +10,8 @@ RUN sudo apt-get -q update && \
   sudo rm -rf /var/lib/apt/lists/* && \
   rm atom.deb
 
+USER root
+
 #RUN sudo apt-get -q update && \
 #    sudo apt-get install -yq atom && \
 #    sudo rm -rf /var/lib/apt/lists/*
