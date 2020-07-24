@@ -51,7 +51,7 @@ TEST_THETIS(TestXml01) {
 #endif
 
 #if BOOM10
-// crashes!
+// crashes in WASI mode!
 TEST_THETIS(TestJson) {
 	std::cout << "test json " << std::endl;
 	auto v = thetis::parse_json("{\"x\":\"y\",\"a\":[1,2,3,4,                       6.1200000000000000000000000000]}");
