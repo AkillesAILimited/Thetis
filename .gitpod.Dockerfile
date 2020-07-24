@@ -3,8 +3,9 @@ FROM gitpod/workspace-full-vnc
 USER gitpod
 
 RUN wget https://atom.io/download/deb
-RUN sudo apt install deb
-RUN rm deb
+RUN mv deb atom.deb
+RUN sudo apt install atom.deb
+RUN rm atom.deb
 
 #RUN sudo apt-get -q update && \
 #    sudo apt-get install -yq atom && \
