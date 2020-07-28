@@ -6,8 +6,12 @@ using namespace rapidxml;
 // Not a real test but a ~ quick demo
 TEST_THETIS(TestXml01) {
     auto folder = thetis::executable_path();
+	if (folder == "") {
+		folder = ".";
+	}
 #ifndef _LIBCPP_HAS_NO_THREADS 	
     spdlog::debug("executable path = {}", folder);
+	std::cerr << "folder = " << folder << std::endl;
 #endif
     auto path = folder 
         + std::string(1, thetis::kPathSeparator) 
@@ -19,6 +23,7 @@ TEST_THETIS(TestXml01) {
 #ifndef _LIBCPP_HAS_NO_THREADS
     spdlog::debug("xml path = {}", path);
 #endif
+	std::cerr << "xml path is " << path << std::endl;
     std::ifstream theFile(path);
 
 	xml_document<> doc;

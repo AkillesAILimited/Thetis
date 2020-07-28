@@ -70,5 +70,6 @@
         "hash_map": "cpp"
     },
     "git.ignoreLimitWarning": true,
-    "C_Cpp.default.configurationProvider": "go2sh.cmake-integration"
+    "C_Cpp.default.configurationProvider": "go2sh.cmake-integration",
+    "cmake.configureOnOpen": true
 }

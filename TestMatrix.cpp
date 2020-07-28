@@ -1,5 +1,5 @@
 #include <iostream>
-#ifndef _LIBCPP_HAS_NO_THREADS
+#if !defined(_LIBCPP_HAS_NO_THREADS) && !defined(__APPLE__)
 #include <omp.h>
 #endif
 #include "TestMatrix.h"
@@ -34,6 +34,7 @@ TEST_THETIS(TestMatrix03) {
 }
 #endif 
 
+#ifndef __APPLE__
 TEST_THETIS(TestMatrix04) {
 
 #ifndef _LIBCPP_HAS_NO_THREADS    
@@ -50,6 +51,7 @@ TEST_THETIS(TestMatrix04) {
     }
 #endif
 }
+#endif
 
 #ifdef BOOM
 TEST_THETIS(TestMatrix05) {

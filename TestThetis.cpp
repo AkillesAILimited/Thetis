@@ -1,5 +1,5 @@
 #include <iostream>
-#ifndef _LIBCPP_HAS_NO_THREADS
+#if !defined(_LIBCPP_HAS_NO_THREADS) && !defined(__APPLE__)
 #include <omp.h>
 #endif
 
@@ -59,7 +59,7 @@ namespace thetis {
         }
         for (uint8_t* p = ((uint8_t*)v)+size; p < ((uint8_t*)v)+size+4096; ++p) {
             if (!(*p == THETIS_MEM_MAGIC)) {
-                fprintf(stderr, "thetis_check_data failure size=%ld [2] %ld\n", size, (int64_t)(p - ((uint8_t*)v)));
+                fprintf(stderr, "thetis_check_data failure size=%ld [2] %lld\n", size, (int64_t)(p - ((uint8_t*)v)));
                 fflush(stderr);
                 return false;
             }
@@ -129,7 +129,7 @@ void operator delete(void* x) throw() {
 DOCTEST_MSVC_SUPPRESS_WARNING_WITH_PUSH(4007) // 'function' : must be 'attribute' - see issue #182
 int main(int argc, char** argv) { 
 
-#ifndef _LIBCPP_HAS_NO_THREADS    
+#if !defined(_LIBCPP_HAS_NO_THREADS) && !defined(__APPLE__)  
     omp_set_dynamic(1);
     omp_set_nested(1); 
     spdlog::set_level(spdlog::level::debug);
@@ -163,7 +163,13 @@ TEST_CASE("main") { std::cout << "hello from <main>" << std::endl << std::flush;
 
 namespace {
 #ifndef _LIBCPP_HAS_NO_THREADS
-    thread_pool::ThreadPool pool(omp_get_max_threads());
+    thread_pool::ThreadPool pool(
+        #ifndef __APPLE__
+            omp_get_max_threads()
+        #else
+            4 // TODO: find call to cound threads ~~~
+        #endif        
+    );
     std::vector< std::future<bool> > results;
 #else
     std::vector<bool> results;

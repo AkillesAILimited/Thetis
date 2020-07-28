@@ -1,9 +1,17 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+include(CPack)
+
 option(USE_CUDA "CUDA/GPU project" ON)
 option(USE_ISOALLOC "Isoalloc/GPU project" OFF) # if OFF, use thetis_alloc ~~~
 option(USE_JULIA "Julia script support" ON)
+option(USE_OPENMP "OpenMP [linux/windows" ON)
 
 message("System = ${CMAKE_SYSTEM_NAME}, UNIX = ${UNIX}")
+
+if (${APPLE})
+    message("macosx, apparently")
+    set(MACOSX TRUE)
+endif()
 
 if (USE_CUDA)
     project(Thetis LANGUAGES CXX CUDA C)
@@ -17,12 +25,14 @@ if (USE_JULIA)
   find_package(Julia REQUIRED)
 endif(USE_JULIA)
 
+if(USE_OPENMP)
 find_package(OpenMP REQUIRED)
 if(OPENMP_FOUND)
  message("using openmp")
  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
@@ -61,6 +71,16 @@ endif(USE_CUDA)
 if (UNIX)
     message("Linux/Unix build!")
 
+    if (MACOSX)
+        set(RDYNAMIC "")
+        set(SANITIZE "-fsanitize=address")
+        set(LASAN "-lasan")
+    else()
+        set(RDYNAMIC "-rdynamic")
+        set(SANITIZE "-fsanitize=address" "-fsanitize=leak")
+        set(LASAN "") # not needed w/gcc+linux
+    endif()
+
     if(USE_JULIA)
         target_include_directories(TestThetis PUBLIC
             "$<BUILD_INTERFACE:${Julia_INCLUDE_DIRS}>"
@@ -92,10 +112,10 @@ if (UNIX)
             target_compile_options(ThetisGPU PUBLIC "-g" "-O0" "-D_DEBUG=1" )
         endif(USE_CUDA)
 
-        target_compile_options(TestThetis PUBLIC "-g" "-rdynamic" "-O0" "-D_DEBUG=1" "-fsanitize=address" "-fsanitize=leak" "-DTHETIS_CPU_ONLY=1")
-        target_compile_options(Thetis PUBLIC "-g" "-rdynamic" "-O0" "-D_DEBUG=1" "-fsanitize=address" "-fsanitize=leak" "-DTHETIS_CPU_ONLY=1")
-
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O0 -D_DEBUG=1")
+        target_compile_options(TestThetis PUBLIC "-g" "${RDYNAMIC}" "-O0" "-D_DEBUG=1" "${SANITIZE}" "-DTHETIS_CPU_ONLY=1")
+        target_compile_options(Thetis PUBLIC "-g" "${RDYNAMIC}" "-O0" "-D_DEBUG=1" "${SANITIZE}" "-DTHETIS_CPU_ONLY=1")
+        target_link_libraries(Thetis ${SANITIZE})
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${RDYNAMIC} -O0 -D_DEBUG=1")
         message(" please use -DCMAKE_BUILD_TYPE=Release or -DCMAKE_BUILD_TYPE=Debug if needed ")
     else(CMAKE_BUILD_TYPE STREQUAL "Debug")
         message("CMAKE_BUILD_TYPE defined as *" ${CMAKE_BUILD_TYPE} "*")
@@ -103,15 +123,15 @@ if (UNIX)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         message("RELEASE COMPILE FLAGS ON: OPTIMIZE FOR SPEED WITH NATIVE(?) ARCH")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -rdynamic -O2")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -rdynamic -O2")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -rdynamic -O2")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${RDYNAMIC} -O2")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${RDYNAMIC} -O2")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g ${RDYNAMIC} -O2")
     endif(CMAKE_BUILD_TYPE STREQUAL "Release")
 
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         target_link_libraries(TestThetis PUBLIC Thetis spdlog $<BUILD_INTERFACE:${Julia_LIBRARY}> ${OpenMP_CXX_LIBRARIES})
     else (CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_link_libraries(TestThetis PUBLIC Thetis spdlog $<BUILD_INTERFACE:${Julia_LIBRARY}> ${OpenMP_CXX_LIBRARIES} "-fsanitize=address" "-fsanitize=leak")
+        target_link_libraries(TestThetis PUBLIC Thetis spdlog $<BUILD_INTERFACE:${Julia_LIBRARY}> ${OpenMP_CXX_LIBRARIES} "${SANITIZE}")
     endif (CMAKE_BUILD_TYPE STREQUAL "Release")
 
     if(USE_CUDA)
@@ -122,3 +142,35 @@ if (UNIX)
         endif(USE_ISOALLOC)
     endif(USE_CUDA)
 endif(UNIX)
+
+# not sure cpack is what I want to use ~~~
+
+set(PROJECT_VERSION_MAJOR "0")
+set(PROJECT_VERSION_MINOR "1")
+set(PROJECT_VERSION_PATCH "2")
+
+set(CPACK_PACKAGE_VENDOR "Akilles AI Limited")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Thetis package example")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+
+if (UNIX)
+# zip -r thetis.zip build_release/libThetis.dylib build_release/*.sh build_release/TestThetis build_release_julia/libThetis.dylib build_release_julia/TestThetis build_release_julia/*.sh testData/* licenses LICENSE $JULIA_HOME_SHORT
+if (MACOSX)
+INSTALL_PROGRAMS(/bin FILES libThetis.dylib TestThetis)
+else()
+INSTALL_PROGRAMS(/bin FILES libThetis.so TestThetis)
+endif()
+INSTALL_FILES(/bin scripts/*.sh)
+INSTALL_FILES(. julia-1.4.2)
+INSTALL_FILES(. testData)
+else()
+# jar cvf thetis-windows.zip build_release_windows/*.dll build_release_windows/*.exe testData/* licenses LICENSE build_release_julia_windows/*.dll build_release_julia_windows/*.exe etc include lib libexec org share
+INSTALL_PROGRAMS(/bin FILES libThetis.dll TestThetis.exe)
+INSTALL_FILES(/bin scripts/*.sh)
+INSTALL_FILES(. etc include lib libexec org share)
+INSTALL_FILES(. testData)
+endif()
