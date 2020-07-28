@@ -16,7 +16,7 @@ jobs:
     - name: configure
       run: ./configure
     - name: make macos
-      run: make
+      run: make macos
     - name: make check
       run: make check
     - name: make distcheck
