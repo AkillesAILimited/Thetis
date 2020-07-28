@@ -8,7 +8,7 @@ mkdir build_release
 mkdir build_release_julia
 
 pushd build_release_julia
-git clone git@github.com:AkillesAILimited/julia-tree-macos.git
+git clone https://github.com/AkillesAILimited/julia-tree-macos.git
 cd julia-tree-macos
 ./make-tree.sh
 mv julia-1.4.2 ../..
