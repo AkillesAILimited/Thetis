@@ -59,7 +59,11 @@ namespace thetis {
         }
         for (uint8_t* p = ((uint8_t*)v)+size; p < ((uint8_t*)v)+size+4096; ++p) {
             if (!(*p == THETIS_MEM_MAGIC)) {
+#ifdef __MACOS__                
                 fprintf(stderr, "thetis_check_data failure size=%ld [2] %lld\n", size, (int64_t)(p - ((uint8_t*)v)));
+#else
+                fprintf(stderr, "thetis_check_data failure size=%ld [2] %ld\n", size, (int64_t)(p - ((uint8_t*)v)));
+#endif                
                 fflush(stderr);
                 return false;
             }
